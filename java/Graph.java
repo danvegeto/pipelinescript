@@ -13,6 +13,8 @@ public class Graph {
 	public Graph(List<Node> node) {
 		nodes = node;
 	}
+
+
 }
 class Node {
 	String stringData;
@@ -28,4 +30,11 @@ class Node {
 		intData = iData;
 		stringData = sData;
 	}
+
+
+	public List<Node> getNeighbor() {
+		return adj;
+	}
+
+
 }
