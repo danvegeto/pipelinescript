@@ -38,6 +38,16 @@ public class Table {
 		 
 		return true;
 	}
+	private String getRow(String[] row){
+		String rtn = "";
+		for (String s : row) {
+			rtn += s;
+		}
+		return rtn;
+	}
+	public Table getTable(){
+		return this;
+	}
 	public String get(int i,int j) {
 		 return table[i][j];
 	}
@@ -76,14 +86,14 @@ public class Table {
 	public String[][] intersection(Table otherTable) {
 		String[][] returnTable = null;
 		List<String[]> rtnList = new ArrayList<>();
-		Map<String[], Boolean> rowMap = new HashMap<>();
+		Map<String, String[]> rowMap = new HashMap<>();
 		
-		for (String[] entre : this.table){
-			rowMap.put(entre,true);
+		for (String[] entre : getTable().table){
+			rowMap.put(getRow(entre), entre);
 		}
 		
 		for (String[] otherRow : otherTable.table ) {
-			if (rowMap.containsKey(otherRow)){
+			if (rowMap.containsKey(getRow(otherRow))){
 				rtnList.add(otherRow);
 			}
 		}
