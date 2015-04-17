@@ -1,4 +1,4 @@
-package pipeline.script;
+package pipelinescript.java;
 
 import java.util.ArrayList;
 import java.util.List;

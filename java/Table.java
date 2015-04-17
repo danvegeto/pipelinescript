@@ -1,16 +1,19 @@
-package pipeline.script;
+package pipelinescript.java;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Table {
-	String [][] table;
+	private String[][] table;
 	
 	public Table(int col, int row){
-		table = new String[col][row];
+		this.table = new String[col][row];
+	}
+	public Table(String[][] t ){
+		this.table = t;
 	}
 	public Table(List<String[]> tab){
-		table = new String[tab.size()][tab.get(0).length];
+		this.table = new String[tab.size()][tab.get(0).length];
 		for (int i = 0 ; i < table.length ; i++) {
 			 for (int j = 0 ; j < table[0].length ; j++) {
 				 this.table[i][j] = ((String[])tab.get(i))[j];
@@ -18,8 +21,8 @@ public class Table {
 		 }
 	}
 	
-	 @Override
-   public boolean equals(Object other) {
+	@Override
+  public boolean equals(Object other) {
 		
 		 Table otherTable = (Table)other;
 		 String [][]comp = otherTable.table;
@@ -33,12 +36,15 @@ public class Table {
 		 
 		return true;
 	}
-	public String at(int i,int j) {
+	public String get(int i,int j) {
 		 return table[i][j];
 	}
+	public void set(int i,int j, String val) {
+		 table[i][j] = val;
+	}
 
-	public Table union(Object other) {
-		 Table otherTable = (Table)other;
+	public Table union(Table otherTable) {
+		 
 		 String [][]comp = otherTable.table;
 		 List<String[]> tbl = new ArrayList<>();
 		 for  (int i = 0 ; i < comp.length ; i++){
@@ -51,7 +57,7 @@ public class Table {
 		 }
 		 return new Table(tbl);
 	}
-	public boolean isEqual(String [] arr1, String [] arr2){
+	private boolean isEqual(String [] arr1, String [] arr2){
 		
 		if (arr1.length != arr2.length) {
 			return false;
