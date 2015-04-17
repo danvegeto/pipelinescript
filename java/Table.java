@@ -1,7 +1,9 @@
 package pipelinescript.java;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Table {
 	private String[][] table;
@@ -69,6 +71,28 @@ public class Table {
 			}
 		}
 		return true;
+	}
+	
+	public String[][] intersection(Table otherTable) {
+		String[][] returnTable = null;
+		List<String[]> rtnList = new ArrayList<>();
+		Map<String[], Boolean> rowMap = new HashMap<>();
+		
+		for (String[] entre : this.table){
+			rowMap.put(entre,true);
+		}
+		
+		for (String[] otherRow : otherTable.table ) {
+			if (rowMap.containsKey(otherRow)){
+				rtnList.add(otherRow);
+			}
+		}
+		returnTable =  new String[rtnList.size()][rtnList.get(0).length];
+		for (int i = 0 ; i < rtnList.size() ; i++ ) {
+			returnTable[i] = rtnList.get(i);
+		}
+		return returnTable;
+		
 	}
 	 
 }
