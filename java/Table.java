@@ -48,6 +48,9 @@ public class Table {
 	public Table getTable(){
 		return this;
 	}
+	public String[][] getTableString(){
+		return table;
+	}
 	public String get(int i,int j) {
 		 return table[i][j];
 	}
