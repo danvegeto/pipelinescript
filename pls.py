@@ -6,7 +6,8 @@ loopVar = 0
 tokens = (
     'NAME','NUMBER', 'STRING', 'COMMA', 'SC',
     'PLUS','MINUS','TIMES','DIVIDE','EQUALS',
-    'LPAREN','RPAREN', 'LBRACKET', 'RBRACKET', 
+    'LPAREN','RPAREN', 'LBRACKET', 'RBRACKET',
+    'LSBRACKET', 'RSBRACKET',
     'PRINT', 'READ', 'RETURN',
     'ITER', 'IF', 'ELSE', 'FOR',
     'LT', 'GT', 'LEQ', 'GEQ', 'DE', 'NE',
@@ -26,6 +27,8 @@ t_LPAREN  = r'\('
 t_RPAREN  = r'\)'
 t_LBRACKET  = r'\{'
 t_RBRACKET  = r'\}'
+t_LSBRACKET  = r'\['
+t_RSBRACKET  = r'\]'
 t_SC  = r';'
 t_LT  = r'<'
 t_GT  = r'>'
@@ -142,8 +145,11 @@ def p_statement_value(t):
 def p_value(t):
     '''value : STRING
               | NUMBER
-              | NAME'''
+              | NAME
+              | NAME dim'''
     t[0] = t[1]
+
+#arr[3] = 2
 
 ############################### COMPARISONS
 
@@ -348,6 +354,48 @@ def p_statement_for4(t):
 
 def p_error(t):
     print("Syntax error at '%s'" % t.value)
+
+
+######################### ARRAYS
+#int[ ][ ] aryNumbers = new int[2][3]
+def p_array(t):
+    '''statement : type dim NAME'''
+    dimension = '[]' * t[2].count('[')
+    t[0] = "%s %s %s = new %s %s"%(t[1],dimension,t[3],t[1],t[2]) 
+
+def p_multidim(t):
+    '''dim : dim dim'''
+    t[0] = "%s %s"%(t[1],t[2]) 
+
+def p_dim(t):
+    '''dim : LSBRACKET NUMBER RSBRACKET'''
+    t[0] = "[%s]"%t[2] 
+
+
+#num[3] = 2
+
+#multidimention?
+#statement?
+
+######################### TABLES
+
+######################### GRAPHS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import ply.yacc as yacc
 yacc.yacc()
