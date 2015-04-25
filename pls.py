@@ -146,9 +146,13 @@ def p_value(t):
     '''value : STRING
               | NUMBER
               | NAME
-              | NAME dim'''
+              | nameDim'''
     t[0] = t[1]
 
+def p_name_dim(t):
+    'nameDim : NAME dim'
+    t[0] = "%s %s"%(t[1],t[2])
+    
 #arr[3] = 2
 
 ############################### COMPARISONS
@@ -252,9 +256,9 @@ def p_declr_assign(t):
     t[0] = "%s %s = %s;"%(t[1],t[2],t[4])
 
 def p_assign(t):
-    'statement : NAME EQUALS value'
+    '''statement : NAME EQUALS value
+                 | nameDim EQUALS value'''
     t[0] = "%s = %s;"%(t[1],t[3])
-
 
 ############################### FUNCTIONS
 
@@ -358,8 +362,13 @@ def p_error(t):
 
 ######################### ARRAYS
 #int[ ][ ] aryNumbers = new int[2][3]
-def p_array(t):
-    '''statement : type dim NAME'''
+def p_array_declr(t):
+    '''statement : type dim NAME''' # num[2][5] a
+    dimension = '[]' * t[2].count('[')
+    t[0] = "%s %s %s = new %s %s"%(t[1],dimension,t[3],t[1],t[2]) 
+
+def p_array_assgn_declr(t):
+    '''statement : type nameDim EQUALS value''' # num[2][5] a 
     dimension = '[]' * t[2].count('[')
     t[0] = "%s %s %s = new %s %s"%(t[1],dimension,t[3],t[1],t[2]) 
 
@@ -372,20 +381,64 @@ def p_dim(t):
     t[0] = "[%s]"%t[2] 
 
 
-#num[3] = 2
+def p_dim_empty(t):
+    '''dim : LSBRACKET RSBRACKET'''
+    t[0] = "[0]" 
 
-#multidimention?
-#statement?
+def p_array_typeDimName(t):
+    'typeDimName : type dim NAME'
+    t[0] = "%s %s %s"%(t[1],t[2],t[3])
+
+def p_array_copy(t):
+    '''statement : typeDimName EQUALS NAME''' #num[] a = b
+    t[0] = "%s = %s.clone()"%(t[1],t[3])
+
+def p_array_dir_assign(t):
+    'statement : typeDimName EQUALS arrayValue'
+    t[0] = "%s = %s"%(t[1],t[3])
+
+def p_arrayValue(t):
+    'arrayValue : LBRACKET entry RBRACKET'
+    print "----"
+    t[0] = "{ %s }"%t[2]
+
+def p_entry_conc(t):
+    'entry : entry COMMA entry'
+    t[0] = "%s , %s"%(t[1],t[3])
+
+def p_entry(t):
+    'entry : value'
+    t[0] = t[1]
+
+def p_entry2(t):
+    'entry : LBRACKET entry RBRACKET'
+    t[0] = "{%s}"%t[2]
+
+'''
 
 ######################### TABLES
+#Table tableName = new Table(2,7)
+    
+def p_table(t):
+    'statement : type NAME EQUALS LSBRACKET entry RSCRACKET' #entry with ,? 
+    dimension = '[]' * t[5].count('[')
+    t[0] = "Table %s = new Table(new %s %s{%s})"%(t[2], t[1], dimension, t[5])#entry with {}
+
+def p_table_print:
+    'statement : print NAME'
+    t[0] = "System.out.println(%s)"%t[2]
+    
 
 ######################### GRAPHS
+def p_graph(t):
+    'statement : type NAME EQUALS NUMBER LSBRACKET entry RSBRACKET'
+    t[0] = "%s %s = new Graph(%s, new int dim {%s})"%(t[1],t[2],t[4],t[6])
 
+def p_graph_print(t):
+    'statement : print NAME'
+    t[0] = "System.out.println(%s)"%t[2]
 
-
-
-
-
+'''
 
 
 
