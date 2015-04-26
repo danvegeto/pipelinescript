@@ -1,12 +1,6 @@
 package com.pipelinescript;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class FileManager {
@@ -30,32 +24,6 @@ public class FileManager {
 	public Object get(String variable){
 		
 		return new Object();
-	}
-	// make sure it points proper CSV file
-	public Graph getGraphFromCSV(String variable){
-		String path = fileMap.get(variable);
-		BufferedReader br = null;
-		String line = "";
-		String cvsSplitBy = "\t";
-		List<String[]> rtn = null;
-		try {
-			br = new BufferedReader(new FileReader(path));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-		rtn = new ArrayList<>();
-			while ((line = br.readLine()) != null) {
-				String[] l = line.split(cvsSplitBy);
-				rtn.add(l);
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return new Graph(rtn);
 	}
 
 }
