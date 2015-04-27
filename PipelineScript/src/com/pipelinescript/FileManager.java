@@ -1,29 +1,25 @@
 package com.pipelinescript;
 
-import java.util.HashMap;
-import java.util.Map;
-
-public class FileManager {
-	Map<String, String> fileMap;
-	public FileManager(){
-		this.fileMap = new HashMap<>();
-	}
-	public void create(String variable, String filepath){
-		fileMap.put(variable,filepath);
-	}
-	public void delete(String variable){
-		fileMap.remove(variable);
-	}
-	public void move(String variable, String filepath){
-		fileMap.put(variable, filepath);
-	}
-	public void set(String variable, Object value){
-		
+public class FileManager 
+{
+	public static Table readTable(String file)
+	{
+		return new Table(read(file));
 	}
 	
-	public Object get(String variable){
-		
-		return new Object();
+	public static void writeTable(String file, Table data)
+	{
+		write(file, data.getRows());
 	}
-
+	
+	private static String[] read(String file)
+	{
+		//TODO
+		return null;
+	}
+	
+	private static void write(String file, String[] data)
+	{
+		//TODO
+	}
 }
