@@ -1,8 +1,10 @@
 import sys
 import random
+import ply.lex as lex
+import ply.yacc as yacc
 
-loopVar = 0
 
+# token names
 tokens = (
     'NAME','NUMBER', 'STRING', 'COMMA', 'SC',
     'PLUS','MINUS','TIMES','DIVIDE','EQUALS',
@@ -15,8 +17,16 @@ tokens = (
     'NUM', 'TEXT',
     )
 
-# Tokens
+# operator precedence
+precedence = (
+    ('left','AND', 'OR', 'NOT'),
+    ('left','LT', 'GT', 'LEQ', 'GEQ', 'DE', 'NE'),
+    ('left','PLUS','MINUS'),
+    ('left','TIMES','DIVIDE'),
+    )
 
+
+# tokens
 t_COMMA    = r','
 t_PLUS    = r'\+'
 t_MINUS   = r'-'
@@ -38,12 +48,23 @@ t_DE  = r'=='
 t_NE  = r'!='
 t_NAME    = r'[a-zA-Z_][a-zA-Z0-9_]*'
 
+
+# ignored characters
+t_ignore = " \t"
+
+
+# loop variable
+loopVar = 0
+
+
 def getVar():
     global loopVar
     loopVar += 1
     return "loopVar_%s"%loopVar
-    
 
+
+# token functions
+    
 def t_NUMBER(t):
     r'\d+'
     t.value = int(t.value)    
@@ -101,9 +122,6 @@ def t_ITER(t):
     r'iter'
     return t
 
-# Ignored characters
-t_ignore = " \t"
-
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += t.value.count("\n")
@@ -111,20 +129,15 @@ def t_newline(t):
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
-    
-# Build the lexer
-import ply.lex as lex
+
+
+# build the lexer
 lex.lex()
 
-precedence = (
-    ('left','AND', 'OR', 'NOT'),
-    ('left','LT', 'GT', 'LEQ', 'GEQ', 'DE', 'NE'),
-    ('left','PLUS','MINUS'),
-    ('left','TIMES','DIVIDE'),
-    )
 
-# dictionary of names
+# dictionary of variable types
 varTypes = { }
+
 
 header = ""
 functions = ""
@@ -152,8 +165,7 @@ def p_value(t):
 def p_name_dim(t):
     'nameDim : NAME dim'
     t[0] = "%s %s"%(t[1],t[2])
-    
-#arr[3] = 2
+
 
 ############################### COMPARISONS
 
@@ -181,6 +193,7 @@ def p_value_ne(t):
     '''value : value NE value'''
     t[0] = "((%s != %s) ? 1 : 0)"%(t[1], t[3])
 
+
 ############################### LOPS
 
 def p_value_and(t):
@@ -195,6 +208,7 @@ def p_value_not(t):
     '''value : NOT value'''
     t[0] = "((%s != 0) ? 0 : 1)"%(t[2])
 
+
 ############################### ARITHMETICS
 
 def sumMethod(a, b, ta, tb):
@@ -205,15 +219,6 @@ def sumMethod(a, b, ta, tb):
 
 def p_value_plus(t):
     '''value : value PLUS value'''
-    """if not isinstance(t[1],tuple):
-        a = t[1]
-        va = varTypes[t[1]]
-    else: (a, va) = t[1]
-    if not isinstance(t[3],tuple):
-        b = t[3]
-        vb = varTypes[t[3]]
-    else: (b, vb) = t[3]"""
-    #t[0] = sumMethod(a,b,va,vb)
     t[0] = "%s + %s"%(t[1],t[3])
 
 def p_value_minus(t):
@@ -228,6 +233,7 @@ def p_value_divide(t):
     '''value : value DIVIDE value'''
     t[0] = "%s / %s"%(t[1], t[3])
 
+
 ############################### READ
 
 def p_value_read(t):
@@ -235,6 +241,7 @@ def p_value_read(t):
     global header
     header += "import java.io.*;\n"
     t[0] = "(new BufferedReader(new InputStreamReader(System.in))).readLine()"
+
 
 ############################### ASSIGNMENTS
 
@@ -259,6 +266,7 @@ def p_assign(t):
     '''statement : NAME EQUALS value
                  | nameDim EQUALS value'''
     t[0] = "%s = %s;"%(t[1],t[3])
+
 
 ############################### FUNCTIONS
 
@@ -298,6 +306,7 @@ def p_return(t):
     'statement : RETURN value'
     t[0] = "return %s;"%t[2]
 
+
 ############################### TYPES
 
 def p_typecast(t):
@@ -313,11 +322,13 @@ def p_type_text(t):
     'type : TEXT'
     t[0] = 'String'
 
+
 ############################### PRINT
 
 def p_statement_print(t):
     'statement : PRINT value'
     t[0] = "System.out.println(%s);"%t[2]
+
 
 ############################### IF
 
@@ -328,6 +339,7 @@ def p_statement_if(t):
 def p_statement_else(t):
     'statement : ELSE LBRACKET statement RBRACKET'
     t[0] = "else { %s }"%t[3]
+
 
 ############################### LOOPS
 
@@ -361,7 +373,7 @@ def p_error(t):
 
 
 ######################### ARRAYS
-#int[ ][ ] aryNumbers = new int[2][3]
+
 def p_array_declr(t):
     '''statement : type dim NAME''' # num[2][5] a
     dimension = '[]' * t[2].count('[')
@@ -379,7 +391,6 @@ def p_multidim(t):
 def p_dim(t):
     '''dim : LSBRACKET NUMBER RSBRACKET'''
     t[0] = "[%s]"%t[2] 
-
 
 def p_dim_empty(t):
     '''dim : LSBRACKET RSBRACKET'''
@@ -414,61 +425,27 @@ def p_entry2(t):
     'entry : LBRACKET entry RBRACKET'
     t[0] = "{%s}"%t[2]
 
-'''
 
-######################### TABLES
-#Table tableName = new Table(2,7)
-    
-def p_table(t):
-    'statement : type NAME EQUALS LSBRACKET entry RSCRACKET' #entry with ,? 
-    dimension = '[]' * t[5].count('[')
-    t[0] = "Table %s = new Table(new %s %s{%s})"%(t[2], t[1], dimension, t[5])#entry with {}
+# perform translation
 
-def p_table_print:
-    'statement : print NAME'
-    t[0] = "System.out.println(%s)"%t[2]
-    
-
-######################### GRAPHS
-def p_graph(t):
-    'statement : type NAME EQUALS NUMBER LSBRACKET entry RSBRACKET'
-    t[0] = "%s %s = new Graph(%s, new int dim {%s})"%(t[1],t[2],t[4],t[6])
-
-def p_graph_print(t):
-    'statement : print NAME'
-    t[0] = "System.out.println(%s)"%t[2]
-
-'''
-
-
-
-
-
-
-
-
-
-
-
-import ply.yacc as yacc
 yacc.yacc()
 
-input = open(sys.argv[1],"r")
+input_code = open(sys.argv[1],"r")
 
-code = ""
+output_code = ""
 
-for line in input.readlines():
+for line in input_code.readlines():
     line = line.replace("\n","")
     line = line.replace(";","")
     if line == "": continue
     if line[:2] == "//": continue
-    code += " %s "%line
+    output_code += " %s "%line
 
-yacc.parse(code)
+yacc.parse(output_code)
 
 print header
-print "public class Output {"
+print "public class Output\n{"
 print functions
-print "public static void main(String[] args) throws Exception {"
+print "public static void main(String[] args) throws Exception\n{"
 print body
-print "}}"
+print "}\n}"
