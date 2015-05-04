@@ -14,7 +14,7 @@ tokens = (
 	'ITER', 'IF', 'ELSE', 'FOR',
 	'LT', 'GT', 'LEQ', 'GEQ', 'DE', 'NE',
 	'AND', 'OR', 'NOT',
-	'NUM', 'TEXT',
+	'NUM', 'TEXT', 'TABLE', 'DOT', 'GRAPH'
 	)
 
 # operator precedence
@@ -47,7 +47,7 @@ t_GEQ  = r'>='
 t_DE  = r'=='
 t_NE  = r'!='
 t_NAME	= r'[a-zA-Z_][a-zA-Z0-9_]*'
-
+t_DOT = r'\.'
 
 # ignored characters
 t_ignore = " \t"
@@ -67,7 +67,7 @@ def getVar():
 	
 def t_NUMBER(t):
 	r'\d+'
-	t.value = int(t.value)	
+	t.value = int(t.value)
 	return t
 
 def t_RETURN(t):
@@ -98,6 +98,14 @@ def t_TEXT(t):
 	r'text'	
 	return t
 
+def t_TABLE(t):
+	r'table'	
+	return t
+	
+def t_GRAPH(t):
+	r'graph'	
+	return t
+	
 def t_IF(t):
 	r'if'	
 	return t
@@ -153,18 +161,40 @@ def p_statement_conc(t):
 
 def p_statement_value(t):
 	'statement : value'
+	print "asddd"
 	t[0] = "%s;"%t[1]
 
 def p_value(t):
 	'''value : STRING
 			  | NUMBER
 			  | NAME
-			  | nameDim'''
+			  | nameDim
+			  | funcCall'''
 	t[0] = t[1]
 
+
+def p_table_value(t):
+	'''value : TABLE LPAREN name_or_number COMMA name_or_number RPAREN'''
+	t[0] = "new Table(%s,%s)"%(t[3],t[5])
+
+def p_graph_value(t):
+	'''value : GRAPH LPAREN name_or_number COMMA name_or_number RPAREN'''
+	t[0] = "new Graph(%s,%s)"%(t[3],t[5])
+	
 def p_name_dim(t):
 	'nameDim : NAME dim'
 	t[0] = "%s %s"%(t[1],t[2])
+	
+def p_name_or_number(t):
+	'''name_or_number : NAME
+					  | NUMBER'''
+	t[0] = t[1]
+	
+
+############################### METHODS
+def p_methods(t):
+	'''statement : NAME DOT funcCall'''
+	t[0] = "%s.%s"%(t[1],t[3])
 
 
 ############################### COMPARISONS
@@ -300,7 +330,7 @@ def p_func_no_return(t):
 	t[0] = ""
 
 def p_func_call(t):
-	'value : NAME LPAREN snd_params RPAREN'
+	'funcCall : NAME LPAREN snd_params RPAREN'
 	t[0] = "%s ( %s )"%(t[1],t[3])
 
 def p_params_rev(t):
@@ -339,6 +369,13 @@ def p_type_text(t):
 	'type : TEXT'
 	t[0] = 'String'
 
+def p_type_table(t):
+	'type : TABLE'
+	t[0] = 'Table'
+
+def p_type_graph(t):
+	'type : GRAPH'
+	t[0] = 'Graph'
 
 ############################### PRINT
 
@@ -392,12 +429,13 @@ def p_error(t):
 ######################### ARRAYS
 
 def p_array_declr(t):
-	'''statement : type dim NAME''' # num[2][5] a
+	'''statement : type dim NAME'''
+	print "declr"
 	dimension = '[]' * t[2].count('[')
 	t[0] = "%s %s %s = new %s %s"%(t[1],dimension,t[3],t[1],t[2]) 
 
 def p_array_assgn_declr(t):
-	'''statement : type nameDim EQUALS value''' # num[2][5] a 
+	'''statement : type nameDim EQUALS value'''
 	dimension = '[]' * t[2].count('[')
 	t[0] = "%s %s %s = new %s %s"%(t[1],dimension,t[3],t[1],t[2]) 
 
@@ -406,7 +444,8 @@ def p_multidim(t):
 	t[0] = "%s %s"%(t[1],t[2]) 
 
 def p_dim(t):
-	'''dim : LSBRACKET NUMBER RSBRACKET'''
+	'''dim : LSBRACKET NUMBER RSBRACKET
+		   | LSBRACKET NAME RSBRACKET '''
 	t[0] = "[%s]"%t[2] 
 
 def p_dim_empty(t):
@@ -442,7 +481,10 @@ def p_entry2(t):
 	'entry : LBRACKET entry RBRACKET'
 	t[0] = "{%s}"%t[2]
 
-
+	
+	
+	
+	
 # perform translation
 
 yacc.yacc()
