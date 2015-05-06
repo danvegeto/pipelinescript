@@ -1,4 +1,5 @@
 import sys
+import re
 import random
 import ply.lex as lex
 import ply.yacc as yacc
@@ -66,60 +67,60 @@ def getVar():
 
 
 # token functions
-	
+
 def t_NUMBER(t):
 	r'\d+'
 	t.value = int(t.value)
 	return t
 
 def t_RETURN(t):
-	r'return'	
+	r'return'
 	return t
 
 def t_NUM(t):
-	r'num'	
+	r'num'
 	return t
 
 def t_READ(t):
-	r'read'	
+	r'read'
 	return t
 
 def t_AND(t):
-	r'and'	
+	r'and'
 	return t
 
 def t_OR(t):
-	r'or'	
+	r'or'
 	return t
 
 def t_NOT(t):
-	r'not'	
+	r'not'
 	return t
 
 def t_TEXT(t):
-	r'text'	
+	r'text'
 	return t
 
 def t_TABLE(t):
-	r'table'	
+	r'table'
 	return t
-	
+
 def t_GRAPH(t):
-	r'graph'	
+	r'graph'
 	return t
-	
+
 def t_IF(t):
-	r'if'	
+	r'if'
 	return t
 
 def t_ELSE(t):
-	r'else'	
+	r'else'
 	return t
 
 def t_STRING(t):
 	r'"[^"]+"'
 	return t
-	
+
 def t_PRINT(t):
 	r'print'
 	return t
@@ -182,16 +183,16 @@ def p_table_value(t):
 def p_graph_value(t):
 	'''value : GRAPH LPAREN name_or_number COMMA name_or_number RPAREN'''
 	t[0] = "new Graph(%s,%s)"%(t[3],t[5])
-	
+
 def p_name_dim(t):
 	'nameDim : NAME dim'
 	t[0] = "%s %s"%(t[1],t[2])
-	
+
 def p_name_or_number(t):
 	'''name_or_number : NAME
 					  | NUMBER'''
 	t[0] = t[1]
-	
+
 
 ############################### METHODS
 def p_methods(t):
@@ -246,41 +247,41 @@ def p_value_not(t):
 def p_value_plus(t):
 	'''value : value PLUS value'''
 	global symbols
-	if symbols[t[1]] == 'double' and symbols[t[3]] == 'double':
+	if get_type(t[1]) == 'double' and get_type(t[3]) == 'double':
 		t[0] = "%s + %s"%(t[1],t[3])
 		symbols[t[0]] = 'double'
-	elif symbols[t[1]] == 'String' and symbols[t[3]] == 'String':
+	elif get_type(t[1]) == 'String' and get_type(t[3]) == 'String':
 		t[0] = "%s + %s"%(t[1],t[3])
 		symbols[t[0]] = 'String'
 	else:
-		raise Exception('semantic error: ' + symbols[t[1]] + ' + ' + symbols[t[3]])
+		raise Exception('semantic error: ' + get_type(t[1]) + ' + ' + get_type(t[3]))
 
 def p_value_minus(t):
 	'''value : value MINUS value'''
 	global symbols
-	if symbols[t[1]] == 'double' and symbols[t[3]] == 'double':
+	if get_type(t[1]) == 'double' and get_type(t[3]) == 'double':
 		t[0] = "%s - %s"%(t[1],t[3])
 		symbols[t[0]] = 'double'
 	else:
-		raise Exception('semantic error: ' + symbols[t[1]] + ' - ' + symbols[t[3]])
+		raise Exception('semantic error: ' + get_type(t[1]) + ' - ' + get_type(t[3]))
 
 def p_value_times(t):
 	'''value : value TIMES value'''
 	global symbols
-	if symbols[t[1]] == 'double' and symbols[t[3]] == 'double':
+	if get_type(t[1]) == 'double' and get_type(t[3]) == 'double':
 		t[0] = "%s * %s"%(t[1],t[3])
 		symbols[t[0]] = 'double'
 	else:
-		raise Exception('semantic error: ' + symbols[t[1]] + ' * ' + symbols[t[3]])
+		raise Exception('semantic error: ' + get_type(t[1]) + ' * ' + get_type(t[3]))
 
 def p_value_divide(t):
 	'''value : value DIVIDE value'''
 	global symbols
-	if symbols[t[1]] == 'double' and symbols[t[3]] == 'double':
+	if get_type(t[1]) == 'double' and get_type(t[3]) == 'double':
 		t[0] = "%s / %s"%(t[1],t[3])
 		symbols[t[0]] = 'double'
 	else:
-		raise Exception('semantic error: ' + symbols[t[1]] + ' / ' + symbols[t[3]])
+		raise Exception('semantic error: ' + get_type(t[1]) + ' / ' + get_type(t[3]))
 
 
 ############################### READ
@@ -434,25 +435,25 @@ def p_array_declr(t):
 	'''statement : type dim NAME'''
 	print "declr"
 	dimension = '[]' * t[2].count('[')
-	t[0] = "%s %s %s = new %s %s"%(t[1],dimension,t[3],t[1],t[2]) 
+	t[0] = "%s %s %s = new %s %s"%(t[1],dimension,t[3],t[1],t[2])
 
 def p_array_assgn_declr(t):
 	'''statement : type nameDim EQUALS value'''
 	dimension = '[]' * t[2].count('[')
-	t[0] = "%s %s %s = new %s %s"%(t[1],dimension,t[3],t[1],t[2]) 
+	t[0] = "%s %s %s = new %s %s"%(t[1],dimension,t[3],t[1],t[2])
 
 def p_multidim(t):
 	'''dim : dim dim'''
-	t[0] = "%s %s"%(t[1],t[2]) 
+	t[0] = "%s %s"%(t[1],t[2])
 
 def p_dim(t):
 	'''dim : LSBRACKET NUMBER RSBRACKET
 		   | LSBRACKET NAME RSBRACKET '''
-	t[0] = "[%s]"%t[2] 
+	t[0] = "[(int)%s]"%t[2]
 
 def p_dim_empty(t):
 	'''dim : LSBRACKET RSBRACKET'''
-	t[0] = "[0]" 
+	t[0] = "[]"
 
 def p_array_typeDimName(t):
 	'typeDimName : type dim NAME'
@@ -464,11 +465,10 @@ def p_array_copy(t):
 
 def p_array_dir_assign(t):
 	'statement : typeDimName EQUALS arrayValue'
-	t[0] = "%s = %s"%(t[1],t[3])
+	t[0] = "%s = %s;"%(t[1],t[3])
 
 def p_arrayValue(t):
 	'arrayValue : LBRACKET entry RBRACKET'
-	print "----"
 	t[0] = "{ %s }"%t[2]
 
 def p_entry_conc(t):
@@ -489,6 +489,38 @@ def p_shell_args(t):
         'value : DOLLAR value'
         t[0] = "args[(int)%s]"%t[2]
         
+
+
+
+
+# helper functions
+
+def get_type(x):
+
+	if x in symbols:
+		return symbols[x]
+	elif is_num_literal(x):
+		return 'double'
+	elif is_text_literal(x):
+		return 'String'
+	elif is_indexed_array(x):
+		return get_indexed_array_type(x)
+	else:
+		return None
+
+def is_num_literal(x):
+	return x.isdigit()
+
+def is_text_literal(x):
+	return x.startswith('"') and x.endswith('"')
+
+def is_indexed_array(x):
+	return re.match('^[a-zA-Z0-9_]+\[\d+\]$')
+
+def get_indexed_array_type(x):
+	array = x.split('[')[0]
+	return get_type(array)
+
 
 
 # perform translation

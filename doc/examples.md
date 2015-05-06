@@ -242,3 +242,102 @@ Output
 foo bar
 ```
 
+
+###shell_args
+
+PipelineScript
+```
+text x = $0
+text y = $1
+print x
+print y
+```
+
+Java
+```java
+public static void main(String[] args)
+{
+  String x = args[0];
+  String y = args[1];
+  System.out.println(x);
+  System.out.println(y);
+}
+```
+Note: This is not a separate function, it is the main method that contains the whole pipeline. `args` has to match.
+
+Output
+```
+> ./pls.sh tests/shell_args.pls foobar
+tests/shell_args.pls
+foobar
+```
+Note: The first argument will be the name of the pipeline file, like in Shell scripts.
+
+
+###file_read
+
+PipelineScript
+```
+text x = @"foobar.txt"
+print x
+```
+
+Java
+```java
+String x = FileManager.read("foobar.txt");
+System.out.println(x);
+```
+
+Output
+```
+this is the contents of foobar.txt
+```
+
+###file_write
+
+PipelineScript
+```
+text x = "this is the contents of foobar.txt"
+@x = "foobar.txt"
+print @"foobar.txt"
+```
+
+Java
+```java
+String x = "this is the contents of foobar.txt"
+FileManager.write("foobar.txt", x);
+System.out.println(FileManager.read("foobar.txt"));
+```
+
+Output
+```
+this is the contents of foobar.txt
+```
+
+
+###function_import
+
+PipelineScript
+```
+function get_names = !"ner/get_names.py"
+text sentence = "President Obama met with Putin in Geneva on Sunday."
+table names = get_names(sentence)
+print names
+```
+
+Java
+```java
+Function get_names = new Function("get_names.py");
+String sentence = "President Obama met with Putin in Geneva on Sunday.";
+Table names = PluginManager.execute(get_names, sentence);
+System.out.println(names);
+```
+
+Output
+```
+PERSON  President Obama
+PERSON  Putin
+LOCATION  Geneva
+```
+
+
