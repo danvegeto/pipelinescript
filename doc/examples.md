@@ -315,3 +315,29 @@ this is the contents of foobar.txt
 ```
 
 
+###function_import
+
+PipelineScript
+```
+function get_names = !"ner/get_names.py"
+text sentence = "President Obama met with Putin in Geneva on Sunday."
+table names = get_names(sentence)
+print names
+```
+
+Java
+```java
+Function get_names = new Function("get_names.py");
+String sentence = "President Obama met with Putin in Geneva on Sunday.";
+Table names = PluginManager.execute(get_names);
+System.out.println(names);
+```
+
+Output
+```
+PERSON  President Obama
+PERSON  Putin
+LOCATION  Geneva
+```
+
+
