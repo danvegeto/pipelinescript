@@ -263,6 +263,7 @@ public static void main(String[] args)
   System.out.println(y);
 }
 ```
+Note: This is not a separate function, it is the main method that contains the whole pipeline. `args` has to match.
 
 Output
 ```
@@ -270,3 +271,5 @@ Output
 tests/shell_args.pls
 foobar
 ```
+Note: The first argument will be the name of the pipeline file, like in Shell scripts.
+
