@@ -14,7 +14,8 @@ tokens = (
 	'ITER', 'IF', 'ELSE', 'FOR',
 	'LT', 'GT', 'LEQ', 'GEQ', 'DE', 'NE',
 	'AND', 'OR', 'NOT',
-	'NUM', 'TEXT', 'TABLE', 'DOT', 'GRAPH'
+	'NUM', 'TEXT', 'TABLE', 'DOT', 'GRAPH',
+        'DOLLAR'
 	)
 
 # operator precedence
@@ -48,6 +49,7 @@ t_DE  = r'=='
 t_NE  = r'!='
 t_NAME	= r'[a-zA-Z_][a-zA-Z0-9_]*'
 t_DOT = r'\.'
+t_DOLLAR = r'\$'
 
 # ignored characters
 t_ignore = " \t"
@@ -481,10 +483,14 @@ def p_entry2(t):
 	'entry : LBRACKET entry RBRACKET'
 	t[0] = "{%s}"%t[2]
 
+######################### SHELL_ARGS
 	
-	
-	
-	
+def p_shell_args(t):
+        'value : DOLLAR value'
+        t[0] = "args[(int)%s]"%t[2]
+        
+
+
 # perform translation
 
 yacc.yacc()
