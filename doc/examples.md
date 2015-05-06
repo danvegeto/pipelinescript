@@ -273,3 +273,45 @@ foobar
 ```
 Note: The first argument will be the name of the pipeline file, like in Shell scripts.
 
+
+###file_read
+
+PipelineScript
+```
+text x = @"foobar.txt"
+print x
+```
+
+Java
+```java
+String x = FileManager.read("foobar.txt");
+System.out.println(x);
+```
+
+Output
+```
+this is the contents of foobar.txt
+```
+
+###file_write
+
+PipelineScript
+```
+text x = "this is the contents of foobar.txt"
+@x = "foobar.txt"
+print @"foobar.txt"
+```
+
+Java
+```java
+String x = "this is the contents of foobar.txt"
+FileManager.write("foobar.txt", x);
+System.out.println(FileManager.read("foobar.txt"));
+```
+
+Output
+```
+this is the contents of foobar.txt
+```
+
+
