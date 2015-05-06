@@ -329,7 +329,7 @@ Java
 ```java
 Function get_names = new Function("get_names.py");
 String sentence = "President Obama met with Putin in Geneva on Sunday.";
-Table names = PluginManager.execute(get_names);
+Table names = PluginManager.execute(get_names, sentence);
 System.out.println(names);
 ```
 
