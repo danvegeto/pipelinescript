@@ -1,9 +1,0 @@
-#!/bin/bash
-python ../pls.py $1 > sandbox/Output.java 2> /dev/null
-cd sanbox
-javac Output.java
-java Output
-rm ../parser.out ../parsetab.py ../parsetab.pyc 2> /dev/null
-
-
-
