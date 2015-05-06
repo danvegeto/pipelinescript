@@ -242,3 +242,31 @@ Output
 foo bar
 ```
 
+
+###shell_args
+
+PipelineScript
+```
+text x = $0
+text y = $1
+print x
+print y
+```
+
+Java
+```java
+public static void main(String[] args)
+{
+  String x = args[0];
+  String y = args[1];
+  System.out.println(x);
+  System.out.println(y);
+}
+```
+
+Output
+```
+> ./pls.sh tests/shell_args.pls foobar
+tests/shell_args.pls
+foobar
+```
