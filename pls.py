@@ -1,4 +1,5 @@
 import sys
+import re
 import random
 import ply.lex as lex
 import ply.yacc as yacc
@@ -492,17 +493,23 @@ def get_type(x):
 		return 'double'
 	elif is_text_literal(x):
 		return 'String'
+	elif is_indexed_array(x):
+		return get_indexed_array_type(x)
 	else:
 		return None
 
 def is_num_literal(x):
-
 	return x.isdigit()
 
 def is_text_literal(x):
-
 	return x.startswith('"') and x.endswith('"')
 
+def is_indexed_array(x):
+	return re.match('^[a-zA-Z0-9_]+\[\d+\]$')
+
+def get_indexed_array_type(x):
+	array = x.split('[')[0]
+	return get_type(array)
 
 
 
