@@ -278,40 +278,45 @@ Note: The first argument will be the name of the pipeline file, like in Shell sc
 
 PipelineScript
 ```
-text x = @"foobar.txt"
-print x
+{{1, 2}, {3, 4}} > "foobar.csv"
+table t = @"foobar.csv"
+print t
 ```
 
 Java
 ```java
-String x = FileManager.read("foobar.txt");
-System.out.println(x);
+FileManager.writeTable("foobar.csv", new Table(new String[][]{{"1", "2"}, {"3", "4"}}));
+Table t = FileManager.readTable("foobar.csv");
+System.out.println(t);
 ```
 
 Output
 ```
-this is the contents of foobar.txt
+1,2
+3,4
 ```
+
 
 ###file_write
 
 PipelineScript
 ```
-text x = "this is the contents of foobar.txt"
-@x = "foobar.txt"
-print @"foobar.txt"
+table t = {{1, 2}, {3, 4}}
+t > "foobar.csv"
+print @"foobar.csv"
 ```
 
 Java
 ```java
-String x = "this is the contents of foobar.txt"
-FileManager.write("foobar.txt", x);
-System.out.println(FileManager.read("foobar.txt"));
+Table t = new Table(new String[][]{{"1", "2"}, {"3", "4"}});
+FileManager.writeTable("foobar.csv", t);
+System.out.println(FileManager.readTable("foobar.csv");
 ```
 
 Output
 ```
-this is the contents of foobar.txt
+1,2
+3,4
 ```
 
 
