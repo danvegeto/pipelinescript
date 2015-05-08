@@ -1,63 +1,51 @@
 package com.pipelinescript;
 
-import java.util.LinkedList;
-import java.util.List;
-
 public class Table
 {
-	public String sep = "\t";
+	public static final TableFormat DEFAULT_FORMAT = new CSVFormat();
 	
-	private int rows, cols;
+	private TableFormat format;
 	private String[][] data;
 	
 	public Table()
 	{
-		this(0, 0);
+		this(DEFAULT_FORMAT);
+	}
+	
+	public Table(TableFormat format)
+	{
+		this(format, new String[0][0]);
 	}
 	
 	public Table(String[] lines)
 	{
-		this(lines, null);
+		this(DEFAULT_FORMAT, lines);
 	}
 	
-	public Table(String[] lines, String sep)
+	public Table(TableFormat format, String[] lines)
 	{
-		if(sep != null)
-			this.sep = sep;
-		
-		List<String[]> list = new LinkedList<String[]>();
-		
-		for(String line : lines)
-			list.add(line.split(sep));
-		
-		init(list.toArray(new String[0][0]));
-	}
-	
-	public Table(int rows, int cols)
-	{
-		this(new String[rows][cols]);
-	}
-	
-	public Table(List<String[]> list)
-	{
-		this(list.toArray(new String[0][0]));
+		this(format, format.decode(lines));
 	}
 	
 	public Table(String[][] data)
 	{
-		init(data);
+		this(DEFAULT_FORMAT, data);
 	}
 	
-	private void init(String[][] data)
+	public Table(TableFormat format, String[][] data)
 	{
+		this.format = format;
 		this.data = data;
-		
-		rows = data.length;
-		
-		if(rows > 0)
-			cols = data[0].length;
-		else
-			cols = 0;
+	}
+	
+	public TableFormat getFormat()
+	{
+		return format;
+	}
+	
+	public void setFormat(TableFormat format)
+	{
+		this.format = format;
 	}
 	
 	public String[][] getData()
@@ -65,14 +53,22 @@ public class Table
 		return data;
 	}
 	
-	public int getRowCount()
+	public String[] getLines()
 	{
-		return rows;
+		return format.encode(data);
 	}
 	
-	public int getColCount()
+	public int getRows()
 	{
-		return cols;
+		return data.length;
+	}
+	
+	public int getCols()
+	{
+		if(data.length == 0)
+			return 0;
+		
+		return data[0].length;
 	}
 	
 	public String get(int row, int col) 
@@ -85,31 +81,6 @@ public class Table
 		data[row][col] = val;
 	}
 	
-	public String[] getRows()
-	{
-		String[] array = new String[rows];
-		
-		for(int i = 0; i < rows; i++)
-			array[i] = String.join(sep, data[i]);
-		
-		return array;
-	}
-	
-	public String[] getRow(int row)
-	{
-		return data[row];
-	}
-	
-	public String[] getCol(int col)
-	{
-		String[] array = new String[rows];
-		
-		for(int i = 0; i < rows; i++)
-			array[i] = data[i][col];
-		
-		return array;
-	}
-	
 	@Override
 	public boolean equals(Object obj) 
 	{	
@@ -119,11 +90,6 @@ public class Table
 	@Override
 	public String toString()
 	{
-		String str = "";
-		
-		for(String[] row : data)
-			str += String.join(sep, row) + "\n";
-		
-		return str;
+		return String.join("\n", getLines());
 	}
 }

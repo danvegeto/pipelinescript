@@ -23,7 +23,7 @@ public class FileManager
 	{
 		String path = DATA_DIR + "/" + file;
 		
-		write(path, data.getRows());
+		write(path, data.getLines());
 	}
 	
 	private static String[] read(String path)
@@ -69,10 +69,5 @@ public class FileManager
 		{
 			e.printStackTrace();
 		}
-	}
-	
-	public static void main(String[] args)
-	{
-		write("test_1.txt", new String[]{"foo", "bar"});
 	}
 }
