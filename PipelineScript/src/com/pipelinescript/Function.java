@@ -9,7 +9,7 @@ public class Function
 		this.file = file;
 	}
 	
-	public Table execute(String... args)
+	public String execute(String... args)
 	{
 		return PluginManager.execute(file, args);
 	}
