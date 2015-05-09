@@ -9,13 +9,14 @@ import java.util.List;
 public class PluginManager
 {	
 	// FOR TEST PURPOSES LEFT 
-	/*
+	
 	public static void main(String[] args){
-		String pt = "./test/PluginManagerTest.py";
-		String[]  arg = new String[]{"1","2","3"};
-		Table tb = execute(pt, arg);
+		String pt = "./test/helloPython.py";
+		String[]  arg = new String[]{""};
+	
+		System.out.print(execute(pt, arg));
 	}
-	*/
+	
 	
 	
 	/*
@@ -28,10 +29,11 @@ public class PluginManager
 	 * 
 	 * 
 	 * */
-	public static Table execute(String file, String... args)
+	public static String execute(String file, String... args)
 	{
 		//TODO
 		List<String> rtn = new ArrayList<>();
+		String rt = "";
 		String ext = file.substring(file.lastIndexOf('.') + 1);
 		String [] lines = null;
 		if (ext.equals("py")){
@@ -44,7 +46,7 @@ public class PluginManager
 				BufferedReader bfr = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 				String line = "";
 				while((line = bfr.readLine()) != null) {
-				 //System.out.println(line);
+				// System.out.println(line);
 				 rtn.add(line);
 				}          
 				
@@ -56,10 +58,10 @@ public class PluginManager
 			lines = new String[rtn.size()];
 			
 			for (int i = 0 ; i< rtn.size() ; i++) {
-				lines[i] = rtn.get(i);
+				rt+=rtn.get(i);
 			}
 			
 		}
-		return new Table(lines);
+		return String.join("\n", rtn);
 	}
 }
