@@ -177,6 +177,13 @@ def p_value(t):
 			  | funcCall'''
 	t[0] = t[1]
 
+#temp production - delete after typecasting is done
+def p_table_dir_assign(t):
+	'value : TABLE LPAREN arrayValue RPAREN'
+	dim = getArrayVDim(t[3])
+        if dim != 2: raise "Table is 2 dimensional"
+	t[0] = "new Table(new Object[][]%s);"%t[3]
+
 
 def p_table_value(t):
 	'''value : TABLE LPAREN name_or_number COMMA name_or_number RPAREN'''
@@ -363,8 +370,12 @@ def p_return(t):
 
 def p_typecast(t):
 	'value : LPAREN type RPAREN value'
-	if t[2] == "double": t[0] = 'Double.parseDouble(%s)'%t[4]
-	elif t[2] == "String": t[0] = '"" + %s'%t[4]
+	if t[2] == "double" and get_type(t[4]) == 'String':
+                t[0] = 'Double.parseDouble(%s)'%t[4]
+	elif t[2] == "String" and get_type(t[4]) == 'double':
+                t[0] = '"" + %s'%t[4]
+        else: raise "error"
+
 
 def p_type_num(t):
 	'type : NUM'
@@ -469,6 +480,11 @@ def p_array_dir_assign(t):
 	'statement : typeDimName EQUALS arrayValue'
 	t[0] = "%s = %s;"%(t[1],t[3])
 
+def getArrayVDim(s):
+        index = s.find("}")
+        return s[:index].count("{")
+
+
 def p_arrayValue(t):
 	'arrayValue : LBRACKET entry RBRACKET'
 	t[0] = "{ %s }"%t[2]
@@ -500,8 +516,6 @@ def p_file_read(t):
 def p_file_write(t):
         'statement : value FWRITE value'
         t[0] = "FileManager.write(%s, %s);"%(t[3], t[1])
-
-
 
 # helper functions
 
