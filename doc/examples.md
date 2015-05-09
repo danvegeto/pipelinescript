@@ -75,11 +75,10 @@ true
 ```
 
 ###var_array
-(not yet implemented)
 
 PipelineScript
 ```
-num[] x = [1, 2, 3]
+num[] x = {1, 2, 3}
 print x
 ```
 
@@ -99,7 +98,7 @@ Output
 
 PipelineScript
 ```
-table x = [[1, 2], [3, 4]]
+table x = {{1, 2}, {3, 4}}
 print x
 ```
 
@@ -115,27 +114,6 @@ Output
 3.0	4.0
 ```
 
-###var_graph
-(not yet implemented)
-
-PipelineScript
-```
-graph x = 3[[1, 2], [1, 3], [2, 3]]
-print x
-```
-
-Java
-```java
-Graph x = new Graph(3, new int[][]{{1, 2}, {3, 4}});
-System.out.println(x);
-```
-
-Output
-```
-3
-1	2
-3	4
-```
 
 ###arith_add
 

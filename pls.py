@@ -565,8 +565,8 @@ for line in input_code.readlines():
 yacc.parse(output_code)
 
 
-print header
 print "package com.pipelinescript;"
+print header
 print "public class Pipeline\n{"
 print functions
 print "public static void main(String[] args) throws Exception\n{"
