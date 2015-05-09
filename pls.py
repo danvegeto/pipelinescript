@@ -16,7 +16,7 @@ tokens = (
 	'LT', 'GT', 'LEQ', 'GEQ', 'DE', 'NE',
 	'AND', 'OR', 'NOT',
 	'NUM', 'TEXT', 'TABLE', 'DOT', 'GRAPH',
-        'DOLLAR'
+    'DOLLAR', 'FREAD', 'FWRITE'
 	)
 
 # operator precedence
@@ -51,6 +51,8 @@ t_NE  = r'!='
 t_NAME	= r'[a-zA-Z_][a-zA-Z0-9_]*'
 t_DOT = r'\.'
 t_DOLLAR = r'\$'
+t_FREAD = r'\@'
+t_FWRITE = r'->'
 
 # ignored characters
 t_ignore = " \t"
@@ -484,12 +486,20 @@ def p_entry2(t):
 	t[0] = "{%s}"%t[2]
 
 ######################### SHELL_ARGS
-	
+
 def p_shell_args(t):
         'value : DOLLAR value'
         t[0] = "args[(int)%s]"%t[2]
-        
 
+######################### FILE_IO
+
+def p_file_read(t):
+        'value : FREAD value'
+        t[0] = "FileManager.read(%s)"%t[2]
+
+def p_file_write(t):
+        'statement : value FWRITE value'
+        t[0] = "FileManager.write(%s, %s);"%(t[3], t[1])
 
 
 
@@ -542,7 +552,8 @@ yacc.parse(output_code)
 
 
 print header
-print "public class Output\n{"
+print "package com.pipelinescript;"
+print "public class Pipeline\n{"
 print functions
 print "public static void main(String[] args) throws Exception\n{"
 print body

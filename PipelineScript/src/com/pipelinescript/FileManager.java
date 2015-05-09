@@ -14,20 +14,22 @@ public class FileManager
 	
 	public static Table readTable(String file)
 	{
-		String path = DATA_DIR + "/" + file;
+		String[] lines = read(file).split("\n");
 		
-		return new Table(read(path));
+		return new Table(lines);
 	}
 	
 	public static void writeTable(String file, Table data)
 	{
 		String path = DATA_DIR + "/" + file;
 		
-		write(path, data.getLines());
+		write(path, data.toString());
 	}
 	
-	private static String[] read(String path)
+	public static String read(String file)
 	{
+		String path = DATA_DIR + "/" + file;
+		
 		List<String> lines = new LinkedList<String>();
 		
 		try
@@ -49,16 +51,18 @@ public class FileManager
 			e.printStackTrace();
 		}
 		
-		return lines.toArray(new String[]{});
+		return String.join("\n", lines);
 	}
 	
-	private static void write(String path, String[] data)
+	public static void write(String file, String data)
 	{
+		String path = DATA_DIR + "/" + file;
+		
 		try
 		{
 			PrintWriter writer = new PrintWriter(new FileWriter(path));
 			
-			for(String line : data)
+			for(String line : data.split("\n"))
 			{
 				writer.println(line);
 			}

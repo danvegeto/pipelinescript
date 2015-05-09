@@ -278,22 +278,21 @@ Note: The first argument will be the name of the pipeline file, like in Shell sc
 
 PipelineScript
 ```
-{{1, 2}, {3, 4}} > "foobar.csv"
-table t = @"foobar.csv"
-print t
+"foo" -> "bar.txt"
+text x = @"bar.txt"
+print x
 ```
 
 Java
 ```java
-FileManager.writeTable("foobar.csv", new Table(new String[][]{{"1", "2"}, {"3", "4"}}));
-Table t = FileManager.readTable("foobar.csv");
-System.out.println(t);
+FileManager.write("bar.txt", "foo");
+String x = FileManager.read("bar.txt");
+System.out.println(x);
 ```
 
 Output
 ```
-1,2
-3,4
+foo
 ```
 
 
@@ -301,22 +300,21 @@ Output
 
 PipelineScript
 ```
-table t = {{1, 2}, {3, 4}}
-t > "foobar.csv"
-print @"foobar.csv"
+text x = "foo"
+x -> "bar.txt"
+print @"bar.txt"
 ```
 
 Java
 ```java
-Table t = new Table(new String[][]{{"1", "2"}, {"3", "4"}});
-FileManager.writeTable("foobar.csv", t);
-System.out.println(FileManager.readTable("foobar.csv");
+String x = "foo";
+FileManager.write("bar.txt", x);
+System.out.println(FileManager.read("bar.txt"));
 ```
 
 Output
 ```
-1,2
-3,4
+foo
 ```
 
 
@@ -344,5 +342,3 @@ PERSON  President Obama
 PERSON  Putin
 LOCATION  Geneva
 ```
-
-
