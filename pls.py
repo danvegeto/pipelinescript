@@ -166,7 +166,6 @@ def p_statement_conc(t):
 
 def p_statement_value(t):
 	'statement : value'
-	print "asddd"
 	t[0] = "%s;"%t[1]
 
 def p_value(t):
@@ -184,6 +183,9 @@ def p_table_dir_assign(t):
         if dim != 2: raise "Table is 2 dimensional"
 	t[0] = "new Table(new Object[][]%s);"%t[3]
 
+def p_table_dir_assign2(t):
+	'value : TABLE LPAREN value RPAREN'
+	t[0] = "new Table(%s);"%t[3]
 
 def p_table_value(t):
 	'''value : TABLE LPAREN name_or_number COMMA name_or_number RPAREN'''
@@ -565,8 +567,8 @@ for line in input_code.readlines():
 yacc.parse(output_code)
 
 
-print "package com.pipelinescript;"
 print header
+print "package com.pipelinescript;"
 print "public class Pipeline\n{"
 print functions
 print "public static void main(String[] args) throws Exception\n{"
