@@ -16,7 +16,7 @@ tokens = (
 	'LT', 'GT', 'LEQ', 'GEQ', 'DE', 'NE',
 	'AND', 'OR', 'NOT',
 	'NUM', 'TEXT', 'TABLE', 'DOT', 'GRAPH',
-    'DOLLAR', 'FREAD', 'FWRITE'
+    'DOLLAR', 'FREAD', 'FWRITE', "EXCLT", "FUNCTION"
 	)
 
 # operator precedence
@@ -53,6 +53,7 @@ t_DOT = r'\.'
 t_DOLLAR = r'\$'
 t_FREAD = r'\@'
 t_FWRITE = r'->'
+t_EXCLT = r'\!'
 
 # ignored characters
 t_ignore = " \t"
@@ -103,6 +104,10 @@ def t_TEXT(t):
 	r'text'
 	return t
 
+def t_FUNCTION(t):
+	r'function'
+	return t
+
 def t_TABLE(t):
 	r'table'
 	return t
@@ -151,6 +156,7 @@ lex.lex()
 # dictionary of variable types
 symbols = { }
 
+loadedFuncs = []
 
 header = ""
 functions = ""
@@ -203,6 +209,13 @@ def p_name_or_number(t):
 	'''name_or_number : NAME
 					  | NUMBER'''
 	t[0] = t[1]
+
+
+############################### FUNC IMPORT
+
+def p_exclamation(t):
+	'''value : EXCLT value'''
+	t[0] = "new Function(%s)"%t[2]
 
 
 ############################### METHODS
@@ -312,15 +325,19 @@ def p_declr(t):
 
 def p_type_name(t):
 	'typename : type NAME'
-	global symbols
+	global symbols, loadedFuncs
 	symbols[t[2]] = t[1]
+	if t[1] == "Function": loadedFuncs.append(t[2])
 	t[0] = "%s %s"%(t[1],t[2])
 
 def p_declr_assign(t):
 	'statement : type NAME EQUALS value'
-	global symbols
+	global symbols, loadedFuncs
 	symbols[t[2]] = t[1]
-	if isinstance(t[4],tuple): t[4] = t[4][0]
+
+	if t[1] == "Function": loadedFuncs.append(t[2])
+
+	#if isinstance(t[4],tuple): t[4] = t[4][0]
 	t[0] = "%s %s = %s;"%(t[1],t[2],t[4])
 
 def p_assign(t):
@@ -345,7 +362,9 @@ def p_func_no_return(t):
 
 def p_func_call(t):
 	'funcCall : NAME LPAREN snd_params RPAREN'
-	t[0] = "%s ( %s )"%(t[1],t[3])
+	if t[1] in loadedFuncs:
+                t[0] = "PluginManager.execute(%s, %s )"%(t[1],t[3])
+	else: t[0] = "%s ( %s )"%(t[1],t[3])
 
 def p_params_rev(t):
 	'''rev_params : rev_params rev_params
@@ -382,6 +401,10 @@ def p_typecast(t):
 def p_type_num(t):
 	'type : NUM'
 	t[0] = 'double'
+
+def p_type_func(t):
+	'type : FUNCTION'
+	t[0] = 'Function'
 
 def p_type_text(t):
 	'type : TEXT'
