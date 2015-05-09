@@ -16,10 +16,9 @@ def fetchFiles(fName):
         if "////" in line:
             if not run(name,'\n'.join(result)):
                 print "%s file has incorrect result!"%name
-                print "\nThe expected output is %s\n"%result            
+                print "\nThe result is %s\n"%result            
             else:
                 print "-----------------------------%s CHECK PASSED----------------------------"%name
-                print "\nThe expected output is %s\n"%result
             aux = 0
             name = ""
             result = []

@@ -1,0 +1,8 @@
+import os
+import os.path
+import subprocess
+import sys
+from StringIO import StringIO
+import re
+
+output=subprocess.Popen(['sh','pls.sh'])
