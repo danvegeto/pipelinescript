@@ -9,8 +9,8 @@ public class Function
 		this.file = file;
 	}
 	
-	public String execute(String... args)
+	public String getFile()
 	{
-		return PluginManager.execute(file, args);
+		return file;
 	}
 }

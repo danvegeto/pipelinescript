@@ -8,6 +8,11 @@ import java.util.List;
 
 public class PluginManager
 {	
+	public static String execute(Function function, String... args)
+	{
+		return execute(function.getFile(), args);
+	}
+	
 	public static String execute(String file, String... args)
 	{
 		List<String> rtn = new ArrayList<>();
@@ -15,10 +20,11 @@ public class PluginManager
 		if (ext.equals("py")){
 			String arguments = "";
 			for (String arg : args) {
-				arguments +=" "+ arg;
+				arguments +=" data/"+ arg;
 			}
 			try {
-				Process pr = Runtime.getRuntime().exec("python "+file+arguments);
+				String cmd = "python plugins/"+file+arguments;
+				Process pr = Runtime.getRuntime().exec(cmd);
 				BufferedReader bfr = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 				String line = "";
 				while((line = bfr.readLine()) != null) {
