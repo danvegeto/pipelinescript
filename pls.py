@@ -165,7 +165,7 @@ loadedFuncs = []
 header = ""
 functions = ""
 
-helperFuncs = {"double2dConcat" : False, "string2dConcat" : False, "double2dDiff" : False}
+helperFuncs = {"double2dConcat" : False, "string2dConcat" : False, "double2dDiff" : False, "string2dDiff" : False}
 
 def p_start(t):
 	'start : statement'
@@ -325,7 +325,7 @@ def p_value_minus(t):
 		t[0] = "%s - %s"%(t[1],t[3])
 		symbols[t[0]] = type1
 	elif type1 == 'double[]' and type2 == 'double[]':
-		if not helperFuncs["double2dConcat"]:
+		if not helperFuncs["double2dDiff"]:
 			helperFuncs["double2dDiff"] = True
 			header += "import java.util.*;\n"
 			functions += '''static double[] difference( double[] b, double[] a ) {
@@ -343,6 +343,25 @@ def p_value_minus(t):
 								}'''
 		t[0] = "difference(%s, %s)"%(t[1],t[3])
 		symbols[t[0]] = 'double[]'
+	elif type1 == 'String[]' and type2 == 'String[]':
+		if not helperFuncs["string2dDiff"]:
+			helperFuncs["string2dDiff"] = True
+			header += "import java.util.*;\n"
+			functions += '''static String[] difference( String[] b, String[] a ) {
+								HashSet<String> res = new HashSet<>();
+								Arrays.sort( a );
+								for ( String elem : b ) {
+									if ( !res.contains( elem ) && Arrays.binarySearch( a, elem ) < 0 )
+										res.add( elem );
+								}
+								String[] ar = new String[ res.size() ];
+								int i = 0;
+								for ( String elem : res )
+									ar[ i++ ] = elem;
+								return ar;
+								}'''
+		t[0] = "difference(%s, %s)"%(t[1],t[3])
+		symbols[t[0]] = 'String[]'
 	else:
 		raise Exception('semantic error: ' + get_type(t[1]) + ' - ' + get_type(t[3]))
 
@@ -667,7 +686,7 @@ yacc.parse(output_code)
 
 
 print header
-#print "package com.pipelinescript;"
+print "package com.pipelinescript;"
 print "public class Pipeline\n{"
 print functions
 print "public static void main(String[] args) throws Exception\n{"
