@@ -1,0 +1,1 @@
+print 7 + "hey" + 2 + "testing"
