@@ -2,15 +2,15 @@ package com.pipelinescript;
 
 public class Function
 {
-	private String file;
+	private String exec;
 	
-	public Function(String file)
+	public Function(String exec)
 	{
-		this.file = file;
+		this.exec = exec;
 	}
 	
-	public String getFile()
+	public String getExec()
 	{
-		return file;
+		return exec;
 	}
 }
