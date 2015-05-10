@@ -16,7 +16,7 @@ tokens = (
 	'LT', 'GT', 'LEQ', 'GEQ', 'DE', 'NE',
 	'AND', 'OR', 'NOT',
 	'NUM', 'TEXT', 'TABLE', 'DOT', 'GRAPH',
-    'DOLLAR', 'FREAD', 'FWRITE', "EXCLT", "FUNCTION"
+    'DOLLAR', 'FREAD', 'FWRITE', 'FSPLIT', 'FPARA', 'EXCLT', 'FUNCTION', 'AMPER'
 	)
 
 # operator precedence
@@ -53,7 +53,10 @@ t_DOT = r'\.'
 t_DOLLAR = r'\$'
 t_FREAD = r'\@'
 t_FWRITE = r'->'
+t_FSPLIT = r'-<'
+t_FPARA = r'=>'
 t_EXCLT = r'\!'
+t_AMPER = r'&'
 
 # ignored characters
 t_ignore = " \t"
@@ -541,6 +544,17 @@ def p_file_read(t):
 def p_file_write(t):
         'statement : value FWRITE value'
         t[0] = "FileManager.write(%s, %s);"%(t[3], t[1])
+
+def p_file_split(t):
+        'statement : value FSPLIT value'
+        t[0] = "FileManager.split(%s, %s);"%(t[3], t[1])
+
+######################### PARALLEL
+
+def p_exec_parallel(t):
+    'statement : AMPER NAME LPAREN snd_params RPAREN FPARA value'
+    t[0] = "ProcessManager.executeParallel(%s, %s, %s);"%(t[2], t[4], t[7])
+
 
 # helper functions
 

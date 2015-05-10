@@ -10,11 +10,25 @@ import java.util.List;
 
 public class FileManager 
 {
-	public static final String DATA_DIR = "data";
+	public static boolean exists(String file)
+	{
+		String path = Config.DATA_DIR + "/" + file;
+		
+		try
+		{
+			BufferedReader reader = new BufferedReader(new FileReader(path));
+		}
+		catch (IOException e)
+		{
+			return false;
+		}
+		
+		return true;
+	}
 	
 	public static String read(String file)
 	{
-		String path = DATA_DIR + "/" + file;
+		String path = Config.DATA_DIR + "/" + file;
 		
 		List<String> lines = new LinkedList<String>();
 		
@@ -47,7 +61,7 @@ public class FileManager
 	
 	public static void write(String file, String data)
 	{
-		String path = DATA_DIR + "/" + file;
+		String path = Config.DATA_DIR + "/" + file;
 		
 		try
 		{
@@ -63,6 +77,17 @@ public class FileManager
 		catch (IOException e)
 		{
 			e.printStackTrace();
+		}
+	}
+	
+	public static void split(String pattern, String data)
+	{
+		String[] lines = data.split("\n");
+		
+		for(int i = 0; i < lines.length; i++)
+		{
+			String file = pattern.replace(Config.SPLIT_CHAR, i+"");
+			write(file, lines[i]);
 		}
 	}
 }

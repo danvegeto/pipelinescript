@@ -21,21 +21,44 @@ public class PluginManager
 		List<String> rtn = new ArrayList<>();
 		
 		String arguments = "";
-		for (String arg : args) {
-			arguments +=" data/"+ arg;
+		for (String arg : args) 
+		{
+			if(arg.contains(Config.SPLIT_CHAR))
+			{
+				for(int i = 0; ; i++)
+				{
+					String path = arg.replace(Config.SPLIT_CHAR, i+"");
+					
+					if(!FileManager.exists(path))
+						break;
+					
+					arguments += " data/" + path;
+				}
+			}
+			else
+			{
+				arguments += " data/" + arg;
+			}
 		}
-		try {
+		try 
+		{
 			
 			String cmd = exec+arguments;
 			System.out.println(cmd);
+			
 			Process pr = Runtime.getRuntime().exec(cmd);
 			BufferedReader bfr = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			
 			String line = "";
-			while((line = bfr.readLine()) != null) {
-			 rtn.add(line);
+			
+			while((line = bfr.readLine()) != null) 
+			{
+				rtn.add(line);
 			}          
 			
-		} catch (IOException e) {
+		} 
+		catch (IOException e) 
+		{
 			e.printStackTrace();
 		}			
 	
