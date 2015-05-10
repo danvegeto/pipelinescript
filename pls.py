@@ -96,6 +96,10 @@ def t_AND(t):
 	r'and'
 	return t
 
+def t_FUNCTION(t):
+	r'function'
+	return t
+
 def t_OR(t):
 	r'or'
 	return t
@@ -156,9 +160,12 @@ lex.lex()
 # dictionary of variable types
 symbols = { }
 
+loadedFuncs = []
 
 header = ""
 functions = ""
+
+helperFuncs = {"double2dConcat" : False, "string2dConcat" : False}
 
 def p_start(t):
 	'start : statement'
@@ -210,6 +217,13 @@ def p_name_or_number(t):
 	t[0] = t[1]
 
 
+############################### FUNC IMPORT
+
+def p_exclamation(t):
+	'''value : EXCLT value'''
+	t[0] = "new Function(%s)"%t[2]
+
+    
 ############################### METHODS
 def p_methods(t):
 	'''statement : NAME DOT funcCall'''
@@ -272,15 +286,29 @@ def p_value_plus(t):
 		t[0] = "%s + %s"%(t[1],t[3])
 		symbols[t[0]] = 'String'
 	elif type1 == 'double[]' and type2 == 'double[]':
-		functions += '''public static double[] concat(double[] a, double[] b) {
-   							int aLen = a.length;
-   							int bLen = b.length;
-   							double[] c= new double[aLen+bLen];
-   							System.arraycopy(a, 0, c, 0, aLen);
-   							System.arraycopy(b, 0, c, aLen, bLen);
-   							return c;}'''
+		if not helperFuncs["double2dConcat"]:
+			helperFuncs["double2dConcat"] = True
+			functions += '''public static double[] concat(double[] a, double[] b) {
+								int aLen = a.length;
+								int bLen = b.length;
+								double[] c= new double[aLen+bLen];
+								System.arraycopy(a, 0, c, 0, aLen);
+								System.arraycopy(b, 0, c, aLen, bLen);
+								return c;}'''
 		t[0] = "concat(%s, %s);"%(t[1],t[3])
 		symbols[t[0]] = 'double[]'
+	elif type1 == 'String[]' and type2 == 'String[]':
+		if not helperFuncs["string2dConcat"]:
+			helperFuncs["string2dConcat"] = True
+			functions += '''public static String[] concat(String[] a, String[] b) {
+								int aLen = a.length;
+								int bLen = b.length;
+								String[] c= new String[aLen+bLen];
+								System.arraycopy(a, 0, c, 0, aLen);
+								System.arraycopy(b, 0, c, aLen, bLen);
+								return c;}'''
+		t[0] = "concat(%s, %s);"%(t[1],t[3])
+		symbols[t[0]] = 'String[]'
 	else:
 		raise Exception('semantic error: ' + get_type(t[1]) + ' + ' + get_type(t[3]))
 
@@ -329,13 +357,15 @@ def p_declr(t):
 
 def p_type_name(t):
 	'typename : type NAME'
-	global symbols
+	global symbols, loadedFuncs
+	if t[1] == "Function": loadedFuncs.append(t[2])
 	symbols[t[2]] = t[1]
 	t[0] = "%s %s"%(t[1],t[2])
 
 def p_declr_assign(t):
 	'statement : type NAME EQUALS value'
-	global symbols
+	global symbols, loadedFuncs
+	if t[1] == "Function": loadedFuncs.append(t[2])
 	symbols[t[2]] = t[1]
 	t[0] = "%s %s = %s;"%(t[1],t[2],t[4])
 
@@ -361,7 +391,9 @@ def p_func_no_return(t):
 
 def p_func_call(t):
 	'funcCall : NAME LPAREN snd_params RPAREN'
-	t[0] = "%s ( %s )"%(t[1],t[3])
+	if t[1] in loadedFuncs:
+		t[0] = "PluginManager.execute(%s, %s )"%(t[1],t[3])
+	else: t[0] = "%s ( %s )"%(t[1],t[3])
 
 def p_params_rev(t):
 	'''rev_params : rev_params rev_params
@@ -395,6 +427,10 @@ def p_typecast(t):
         else: raise "error"
 
 
+def p_type_func(t):
+	'type : FUNCTION'
+	t[0] = 'Function'
+        
 def p_type_num(t):
 	'type : NUM'
 	t[0] = 'double'
@@ -603,7 +639,7 @@ yacc.parse(output_code)
 
 
 print header
-print "package com.pipelinescript;"
+#print "package com.pipelinescript;"
 print "public class Pipeline\n{"
 print functions
 print "public static void main(String[] args) throws Exception\n{"
