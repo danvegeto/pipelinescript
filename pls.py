@@ -283,7 +283,7 @@ def p_value_plus(t):
 	global symbols, functions
 	type1 = get_type(t[1])
 	type2 = get_type(t[3])
-	if type1 == 'double' and type2 == 'double':
+	if type1 == 'double' and type2 == 'double' or type1 == 'String' and type2 == 'String':
 		t[0] = "%s + %s"%(t[1],t[3])
 		symbols[t[0]] = type1
 	elif type1 == 'double' and type2 == 'String' or type1 == 'String' and type2 == 'double':
