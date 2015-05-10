@@ -428,6 +428,12 @@ def p_assign(t):
 
 ############################### FUNCTIONS
 
+def p_func2(t):
+	'statement : type dim NAME LPAREN rev_params RPAREN LBRACKET statement RBRACKET'
+	global functions
+	functions += "public static %s %s %s ( %s ) { %s }\n"%(t[1],t[2],t[3],t[5],t[8])
+	t[0] = ""
+
 def p_func(t):
 	'statement : typename LPAREN rev_params RPAREN LBRACKET statement RBRACKET'
 	global functions
@@ -448,11 +454,17 @@ def p_func_call(t):
 
 def p_params_rev(t):
 	'''rev_params : rev_params rev_params
+                  | type dim NAME
 				  | typename
 				  | '''
+	global symbols, loadedFuncs
 	if len(t) == 1: t[0] = ""
+	elif len(t) == 4: 
+		symbols[t[3]] = "%s[]"%t[1]
+		t[0] = "%s %s %s"%(t[1],t[2],t[3])
 	elif len(t) == 2: t[0] = t[1]
 	else: t[0] = "%s, %s"%(t[1],t[2])
+    
 
 def p_params_snd(t):
 	'''snd_params : snd_params snd_params
@@ -650,7 +662,8 @@ def p_exec_parallel(t):
 # helper functions
 
 def get_type(x):
-
+	if isinstance(x,str):
+		if ".length" in x: return 'double'
 	if x in symbols:
 		return symbols[x]
 	elif is_num_literal(x):
