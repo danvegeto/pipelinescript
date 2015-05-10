@@ -232,7 +232,7 @@ def p_exclamation(t):
 ############################### METHODS
 def p_methods(t):
 	'''value : NAME DOT funcCall'''
-	t[0] = "%s.%s"%(t[1],t[3])
+	t[0] = "%s.%s"%(t[1],t[3])  
 
 def p_attrib(t):
 	'''value : NAME DOT NAME'''
@@ -285,7 +285,7 @@ def p_value_not(t):
 
 def p_value_plus(t):
 	'''value : value PLUS value'''
-	global symbols, functions
+	global symbols, functions, header
 	type1 = get_type(t[1])
 	type2 = get_type(t[3])
 	if type1 == 'double' and type2 == 'double' or type1 == 'String' and type2 == 'String':
@@ -297,6 +297,7 @@ def p_value_plus(t):
 	elif type1 == 'double[]' and type2 == 'double[]':
 		if not helperFuncs["double2dConcat"]:
 			helperFuncs["double2dConcat"] = True
+			header += "import java.util.Arrays;;\n"
 			functions += '''public static double[] concat(double[] a, double[] b) {
 								int aLen = a.length;
 								int bLen = b.length;
@@ -309,6 +310,7 @@ def p_value_plus(t):
 	elif type1 == 'String[]' and type2 == 'String[]':
 		if not helperFuncs["string2dConcat"]:
 			helperFuncs["string2dConcat"] = True
+			header += "import java.util.Arrays;;\n"
 			functions += '''public static String[] concat(String[] a, String[] b) {
 								int aLen = a.length;
 								int bLen = b.length;
