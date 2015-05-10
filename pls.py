@@ -16,7 +16,7 @@ tokens = (
 	'LT', 'GT', 'LEQ', 'GEQ', 'DE', 'NE',
 	'AND', 'OR', 'NOT',
 	'NUM', 'TEXT', 'TABLE', 'DOT', 'GRAPH',
-    'DOLLAR', 'FREAD', 'FWRITE', "EXCLT", "FUNCTION"
+    'DOLLAR', 'FREAD', 'FWRITE'
 	)
 
 # operator precedence
@@ -53,7 +53,6 @@ t_DOT = r'\.'
 t_DOLLAR = r'\$'
 t_FREAD = r'\@'
 t_FWRITE = r'->'
-t_EXCLT = r'\!'
 
 # ignored characters
 t_ignore = " \t"
@@ -104,10 +103,6 @@ def t_TEXT(t):
 	r'text'
 	return t
 
-def t_FUNCTION(t):
-	r'function'
-	return t
-
 def t_TABLE(t):
 	r'table'
 	return t
@@ -156,7 +151,6 @@ lex.lex()
 # dictionary of variable types
 symbols = { }
 
-loadedFuncs = []
 
 header = ""
 functions = ""
@@ -187,7 +181,7 @@ def p_table_dir_assign(t):
 	'value : TABLE LPAREN arrayValue RPAREN'
 	dim = getArrayVDim(t[3])
         if dim != 2: raise "Table is 2 dimensional"
-	t[0] = "new Table(new String[][]%s);"%t[3]
+	t[0] = "new Table(new Object[][]%s);"%t[3]
 
 def p_table_dir_assign2(t):
 	'value : TABLE LPAREN value RPAREN'
@@ -209,13 +203,6 @@ def p_name_or_number(t):
 	'''name_or_number : NAME
 					  | NUMBER'''
 	t[0] = t[1]
-
-
-############################### FUNC IMPORT
-
-def p_exclamation(t):
-	'''value : EXCLT value'''
-	t[0] = "new Function(%s)"%t[2]
 
 
 ############################### METHODS
@@ -270,13 +257,25 @@ def p_value_not(t):
 
 def p_value_plus(t):
 	'''value : value PLUS value'''
-	global symbols
-	if get_type(t[1]) == 'double' and get_type(t[3]) == 'double':
+	global symbols, functions
+	type1 = get_type(t[1])
+	type2 = get_type(t[3])
+	if type1 == 'double' and type2 == 'double':
 		t[0] = "%s + %s"%(t[1],t[3])
-		symbols[t[0]] = 'double'
-	elif get_type(t[1]) == 'String' and get_type(t[3]) == 'String':
+		symbols[t[0]] = type1
+	elif type1 == 'double' and type2 == 'String' or type1 == 'String' and type2 == 'double':
 		t[0] = "%s + %s"%(t[1],t[3])
 		symbols[t[0]] = 'String'
+	elif type1 == 'double[]' and type2 == 'double[]':
+		functions += '''public static double[] concat(double[] a, double[] b) {
+   							int aLen = a.length;
+   							int bLen = b.length;
+   							double[] c= new double[aLen+bLen];
+   							System.arraycopy(a, 0, c, 0, aLen);
+   							System.arraycopy(b, 0, c, aLen, bLen);
+   							return c;}'''
+		t[0] = "concat(%s, %s);"%(t[1],t[3])
+		symbols[t[0]] = 'double[]'
 	else:
 		raise Exception('semantic error: ' + get_type(t[1]) + ' + ' + get_type(t[3]))
 
@@ -325,19 +324,14 @@ def p_declr(t):
 
 def p_type_name(t):
 	'typename : type NAME'
-	global symbols, loadedFuncs
+	global symbols
 	symbols[t[2]] = t[1]
-	if t[1] == "Function": loadedFuncs.append(t[2])
 	t[0] = "%s %s"%(t[1],t[2])
 
 def p_declr_assign(t):
 	'statement : type NAME EQUALS value'
-	global symbols, loadedFuncs
+	global symbols
 	symbols[t[2]] = t[1]
-
-	if t[1] == "Function": loadedFuncs.append(t[2])
-
-	#if isinstance(t[4],tuple): t[4] = t[4][0]
 	t[0] = "%s %s = %s;"%(t[1],t[2],t[4])
 
 def p_assign(t):
@@ -362,9 +356,7 @@ def p_func_no_return(t):
 
 def p_func_call(t):
 	'funcCall : NAME LPAREN snd_params RPAREN'
-	if t[1] in loadedFuncs:
-                t[0] = "PluginManager.execute(%s, %s )"%(t[1],t[3])
-	else: t[0] = "%s ( %s )"%(t[1],t[3])
+	t[0] = "%s ( %s )"%(t[1],t[3])
 
 def p_params_rev(t):
 	'''rev_params : rev_params rev_params
@@ -401,10 +393,6 @@ def p_typecast(t):
 def p_type_num(t):
 	'type : NUM'
 	t[0] = 'double'
-
-def p_type_func(t):
-	'type : FUNCTION'
-	t[0] = 'Function'
 
 def p_type_text(t):
 	'type : TEXT'
@@ -468,15 +456,20 @@ def p_error(t):
 
 
 ######################### ARRAYS
-
+#num[2] a
 def p_array_declr(t):
 	'''statement : type dim NAME'''
-	print "declr"
+	global symbols
+	symbols[t[3]] = "%s[]"%t[1]
 	dimension = '[]' * t[2].count('[')
 	t[0] = "%s %s %s = new %s %s"%(t[1],dimension,t[3],t[1],t[2])
 
+#num a[2] = ?
 def p_array_assgn_declr(t):
 	'''statement : type nameDim EQUALS value'''
+	global symbols
+	name = t[1].split('[')[0]
+	symbols[name] = "%s[]"%t[1]
 	dimension = '[]' * t[2].count('[')
 	t[0] = "%s %s %s = new %s %s"%(t[1],dimension,t[3],t[1],t[2])
 
@@ -495,6 +488,8 @@ def p_dim_empty(t):
 
 def p_array_typeDimName(t):
 	'typeDimName : type dim NAME'
+	global symbols
+	symbols[t[3]] = "%s[]"%t[1]
 	t[0] = "%s %s %s"%(t[1],t[2],t[3])
 
 def p_array_copy(t):
@@ -564,12 +559,13 @@ def is_text_literal(x):
 	return x.startswith('"') and x.endswith('"')
 
 def is_indexed_array(x):
-	return re.match('^[a-zA-Z0-9_]+\[\d+\]$')
+	m = re.match('^[a-zA-Z0-9_]+\[\d+\]$',x)
+	m = (m != None)
+	return m
 
 def get_indexed_array_type(x):
 	array = x.split('[')[0]
-	return get_type(array)
-
+	return "%s[]"%get_type(array)
 
 
 # perform translation
