@@ -507,7 +507,7 @@ def p_array_declr(t):
 	global symbols
 	symbols[t[3]] = "%s[]"%t[1]
 	dimension = '[]' * t[2].count('[')
-	t[0] = "%s %s %s = new %s %s"%(t[1],dimension,t[3],t[1],t[2])
+	t[0] = "%s %s %s = new %s %s;"%(t[1],dimension,t[3],t[1],t[2])
 
 #num a[2] = ?
 def p_array_assgn_declr(t):
@@ -516,15 +516,14 @@ def p_array_assgn_declr(t):
 	name = t[1].split('[')[0]
 	symbols[name] = "%s[]"%t[1]
 	dimension = '[]' * t[2].count('[')
-	t[0] = "%s %s %s = new %s %s"%(t[1],dimension,t[3],t[1],t[2])
+	t[0] = "%s %s %s = new %s %s;"%(t[1],dimension,t[3],t[1],t[2])
 
 def p_multidim(t):
 	'''dim : dim dim'''
 	t[0] = "%s %s"%(t[1],t[2])
 
 def p_dim(t):
-	'''dim : LSBRACKET NUMBER RSBRACKET
-		   | LSBRACKET NAME RSBRACKET '''
+	'''dim : LSBRACKET value RSBRACKET'''
 	t[0] = "[(int)%s]"%t[2]
 
 def p_dim_empty(t):
@@ -541,6 +540,7 @@ def p_array_copy(t):
 	'''statement : typeDimName EQUALS NAME''' #num[] a = b
 	t[0] = "%s = %s.clone()"%(t[1],t[3])
 
+    
 def p_array_dir_assign(t):
 	'statement : typeDimName EQUALS arrayValue'
 	t[0] = "%s = %s;"%(t[1],t[3])
@@ -643,7 +643,7 @@ yacc.parse(output_code)
 
 
 print header
-#print "package com.pipelinescript;"
+print "package com.pipelinescript;"
 print "public class Pipeline\n{"
 print functions
 print "public static void main(String[] args) throws Exception\n{"
