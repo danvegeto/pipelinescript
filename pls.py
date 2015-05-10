@@ -226,9 +226,13 @@ def p_exclamation(t):
     
 ############################### METHODS
 def p_methods(t):
-	'''statement : NAME DOT funcCall'''
+	'''value : NAME DOT funcCall'''
 	t[0] = "%s.%s"%(t[1],t[3])
 
+def p_attrib(t):
+	'''value : NAME DOT NAME'''
+	t[0] = "%s.%s"%(t[1],t[3])
+    
 
 ############################### COMPARISONS
 
@@ -291,7 +295,7 @@ def p_value_plus(t):
 			functions += '''public static double[] concat(double[] a, double[] b) {
 								int aLen = a.length;
 								int bLen = b.length;
-								double[] c= new double[aLen+bLen];
+								double[] c = new double[aLen+bLen];
 								System.arraycopy(a, 0, c, 0, aLen);
 								System.arraycopy(b, 0, c, aLen, bLen);
 								return c;}'''
@@ -303,7 +307,7 @@ def p_value_plus(t):
 			functions += '''public static String[] concat(String[] a, String[] b) {
 								int aLen = a.length;
 								int bLen = b.length;
-								String[] c= new String[aLen+bLen];
+								String[] c = new String[aLen+bLen];
 								System.arraycopy(a, 0, c, 0, aLen);
 								System.arraycopy(b, 0, c, aLen, bLen);
 								return c;}'''
