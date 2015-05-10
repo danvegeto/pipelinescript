@@ -35,7 +35,7 @@ def run(fName, result):
     #output=subprocess.Popen(['./do.sh', "fib.pls"], stdout = subprocess.PIPE,stderr = subprocess.PIPE)
     output=subprocess.Popen(['sh','pls.sh', fName], stdout = subprocess.PIPE,stderr = subprocess.PIPE)    
     concline = ''.join(output.stdout.readlines() )
-    if result in concline:
+    if result.replace("\r","") in concline.replace("\r",""):
         return True
     return False
 
