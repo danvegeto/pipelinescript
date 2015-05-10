@@ -187,7 +187,7 @@ def p_table_dir_assign(t):
 	'value : TABLE LPAREN arrayValue RPAREN'
 	dim = getArrayVDim(t[3])
         if dim != 2: raise "Table is 2 dimensional"
-	t[0] = "new Table(new Object[][]%s);"%t[3]
+	t[0] = "new Table(new String[][]%s);"%t[3]
 
 def p_table_dir_assign2(t):
 	'value : TABLE LPAREN value RPAREN'

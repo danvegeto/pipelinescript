@@ -40,6 +40,11 @@ public class FileManager
 		return String.join("\n", lines);
 	}
 	
+	public static void write(String file, Table data)
+	{
+		write(file, data.toString());
+	}
+	
 	public static void write(String file, String data)
 	{
 		String path = DATA_DIR + "/" + file;

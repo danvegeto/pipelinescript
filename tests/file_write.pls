@@ -1,3 +1,3 @@
-text x = "foo"
-x -> "bar.txt"
-print @"bar.txt"
+table t = table({{"1","2"},{"3","4"}})
+t -> "table.csv"
+print @"table.csv"

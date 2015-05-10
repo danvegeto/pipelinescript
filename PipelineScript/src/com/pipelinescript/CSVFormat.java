@@ -101,6 +101,15 @@ public class CSVFormat extends TableFormat
 					value += c;
 				}
 			}
+			
+			if(i == str.length()-1)
+			{
+				if(!value.isEmpty())
+					line.add(value);
+				
+				if(!line.isEmpty())
+					lines.add(line.toArray(new String[]{}));
+			}
 		}
 		
 		return lines.toArray(new String[][]{});
