@@ -12,20 +12,6 @@ public class FileManager
 {
 	public static final String DATA_DIR = "data";
 	
-	public static Table readTable(String file)
-	{
-		String[] lines = read(file).split("\n");
-		
-		return new Table(lines);
-	}
-	
-	public static void writeTable(String file, Table data)
-	{
-		String path = DATA_DIR + "/" + file;
-		
-		write(path, data.toString());
-	}
-	
 	public static String read(String file)
 	{
 		String path = DATA_DIR + "/" + file;

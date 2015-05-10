@@ -17,14 +17,14 @@ public class Table
 		this(format, new String[0][0]);
 	}
 	
-	public Table(String[] lines)
+	public Table(String str)
 	{
-		this(DEFAULT_FORMAT, lines);
+		this(DEFAULT_FORMAT, str);
 	}
 	
-	public Table(TableFormat format, String[] lines)
+	public Table(TableFormat format, String str)
 	{
-		this(format, format.decode(lines));
+		this(format, format.decode(str));
 	}
 	
 	public Table(String[][] data)
@@ -51,11 +51,6 @@ public class Table
 	public String[][] getData()
 	{
 		return data;
-	}
-	
-	public String[] getLines()
-	{
-		return format.encode(data);
 	}
 	
 	public int getRows()
@@ -90,6 +85,6 @@ public class Table
 	@Override
 	public String toString()
 	{
-		return String.join("\n", getLines());
+		return format.encode(data);
 	}
 }
