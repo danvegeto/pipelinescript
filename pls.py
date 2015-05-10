@@ -16,7 +16,8 @@ tokens = (
 	'LT', 'GT', 'LEQ', 'GEQ', 'DE', 'NE',
 	'AND', 'OR', 'NOT',
 	'NUM', 'TEXT', 'TABLE', 'DOT', 'GRAPH',
-    'DOLLAR', 'FREAD', 'FWRITE', 'FSPLIT', 'FPARA', 'EXCLT', 'FUNCTION', 'AMPER'
+    'DOLLAR', 'FREAD', 'FWRITE', 'FSPLIT', 'FPARA', 'EXCLT', 'FUNCTION', 'AMPER',
+    'BREAK'
 	)
 
 # operator precedence
@@ -86,6 +87,10 @@ def t_RETURN(t):
 
 def t_NUM(t):
 	r'num'
+	return t
+    
+def t_BREAK(t):
+	r'break'
 	return t
 
 def t_READ(t):
@@ -542,6 +547,10 @@ def p_statement_for4(t):
 def p_error(t):
 	print("Syntax error at '%s'" % t.value)
 
+    
+def p_break(t):
+	'statement : BREAK'
+	t[0] = "break;"
 
 ######################### ARRAYS
 #num[2] a
