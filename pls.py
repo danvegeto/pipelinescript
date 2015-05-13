@@ -17,7 +17,7 @@ tokens = (
 	'AND', 'OR', 'NOT',
 	'NUM', 'TEXT', 'TABLE', 'DOT', 'GRAPH',
     'DOLLAR', 'FREAD', 'FWRITE', 'FSPLIT', 'FPARA', 'EXCLT', 'FUNCTION', 'AMPER',
-    'BREAK'
+    'BREAK', 'NL'
 	)
 
 # operator precedence
@@ -149,12 +149,13 @@ def t_ITER(t):
 	r'iter'
 	return t
 
-def t_newline(t):
+def t_NL(t):
 	r'\n+'
 	t.lexer.lineno += t.value.count("\n")
+	return t
 
 def t_error(t):
-	print("Illegal character '%s'" % t.value[0])
+	print("Line %s: Illegal character '%s'" % (t.lexer.lineno,t.value[0]))
 	t.lexer.skip(1)
 
 
@@ -179,7 +180,15 @@ def p_start(t):
 
 def p_statement_conc(t):
 	'statement : statement statement'
-	t[0] = "%s\n %s"%(t[1],t[2])
+	t[0] = "%s %s"%(t[1],t[2])
+    
+def p_statement_sc(t):
+	'statement : statement SC'
+	t[0] = "%s;"%t[1]
+    
+def p_statement_free(t):
+	'statement : NL'
+	t[0] = ""
 
 def p_statement_value(t):
 	'statement : value'
@@ -197,7 +206,7 @@ def p_value(t):
 def p_table_dir_assign(t):
 	'value : TABLE LPAREN arrayValue RPAREN'
 	dim = getArrayVDim(t[3])
-        if dim != 2: raise "Table is 2 dimensional"
+        if dim != 2: raise BaseException("Line %s: Table is 2 dimensional"%(t.lexer.lineno-1))
 	t[0] = "new Table(new Object[][]%s);"%t[3]
 
 def p_table_dir_assign2(t):
@@ -321,7 +330,7 @@ def p_value_plus(t):
 		t[0] = "concat(%s, %s)"%(t[1],t[3])
 		symbols[t[0]] = 'String[]'
 	else:
-		raise Exception('semantic error: ' + get_type(t[1]) + ' + ' + get_type(t[3]))
+		raise BaseException("Line %s: Semantic error, %s + %s"%((t.lexer.lineno-1), type1, type2))
 
 def p_value_minus(t):
 	'''value : value MINUS value'''
@@ -370,7 +379,7 @@ def p_value_minus(t):
 		t[0] = "difference(%s, %s)"%(t[1],t[3])
 		symbols[t[0]] = 'String[]'
 	else:
-		raise Exception('semantic error: ' + get_type(t[1]) + ' - ' + get_type(t[3]))
+		raise BaseException("Line %s: Semantic error, %s - %s"%((t.lexer.lineno-1), type1, type2))
 
 def p_value_times(t):
 	'''value : value TIMES value'''
@@ -379,7 +388,7 @@ def p_value_times(t):
 		t[0] = "%s * %s"%(t[1],t[3])
 		symbols[t[0]] = 'double'
 	else:
-		raise Exception('semantic error: ' + get_type(t[1]) + ' * ' + get_type(t[3]))
+		raise BaseException("Line %s: Semantic error, %s * %s"%((t.lexer.lineno-1), type1, type2))
 
 def p_value_divide(t):
 	'''value : value DIVIDE value'''
@@ -388,7 +397,7 @@ def p_value_divide(t):
 		t[0] = "%s / %s"%(t[1],t[3])
 		symbols[t[0]] = 'double'
 	else:
-		raise Exception('semantic error: ' + get_type(t[1]) + ' / ' + get_type(t[3]))
+		raise BaseException("Line %s: Semantic error, %s / %s"%((t.lexer.lineno-1), type1, type2))
 
 
 ############################### READ
@@ -487,7 +496,7 @@ def p_typecast(t):
                 t[0] = 'Double.parseDouble(%s)'%t[4]
 	elif t[2] == "String" and get_type(t[4]) == 'double':
                 t[0] = '"" + %s'%t[4]
-        else: raise "error"
+        else: raise BaseException("Line %s: Unknown typecast"%(t.lexer.lineno-1))
 
 
 def p_type_func(t):
@@ -559,7 +568,7 @@ def p_statement_for4(t):
 	t[0] = "%s for(; (%s) != 0;) { %s}"%(t[3],t[5],t[9])
 
 def p_error(t):
-	print("Syntax error at '%s'" % t.value)
+	print("Syntax error at '%s'" % [t.value])
 
     
 def p_break(t):
@@ -567,7 +576,6 @@ def p_break(t):
 	t[0] = "break;"
 
 ######################### ARRAYS
-#num[2] a
 def p_array_declr(t):
 	'''statement : type dim NAME'''
 	global symbols
@@ -575,7 +583,6 @@ def p_array_declr(t):
 	dimension = '[]' * t[2].count('[')
 	t[0] = "%s %s %s = new %s %s;"%(t[1],dimension,t[3],t[1],t[2])
 
-#num a[2] = ?
 def p_array_assgn_declr(t):
 	'''statement : type nameDim EQUALS value'''
 	global symbols
@@ -603,7 +610,7 @@ def p_array_typeDimName(t):
 	t[0] = "%s %s %s"%(t[1],t[2],t[3])
 
 def p_array_copy(t):
-	'''statement : typeDimName EQUALS NAME''' #num[] a = b
+	'''statement : typeDimName EQUALS NAME'''
 	t[0] = "%s = %s.clone()"%(t[1],t[3])
 
     
@@ -700,17 +707,19 @@ input_code = open(sys.argv[1],"r")
 output_code = ""
 
 for line in input_code.readlines():
-	line = line.replace("\n","")
+	line = line.replace("\r","")
+	#line = line.replace("\n","")
 	line = line.replace(";","")
-	if line == "": continue
+	#if line == "": continue
 	if line[:2] == "//": continue
-	output_code += " %s "%line
+	output_code += "%s "%line
 
 yacc.parse(output_code)
 
 
-print header
+
 print "package com.pipelinescript;"
+print header
 print "public class Pipeline\n{"
 print functions
 print "public static void main(String[] args) throws Exception\n{"
