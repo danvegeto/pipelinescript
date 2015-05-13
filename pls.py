@@ -180,7 +180,7 @@ def p_start(t):
 
 def p_statement_conc(t):
 	'statement : statement statement'
-	t[0] = "%s %s"%(t[1],t[2])
+	t[0] = "%s\n%s"%(t[1],t[2])
     
 def p_statement_sc(t):
 	'statement : statement SC'
@@ -462,17 +462,19 @@ def p_func_call(t):
 	else: t[0] = "%s ( %s )"%(t[1],t[3])
 
 def p_params_rev(t):
-	'''rev_params : rev_params rev_params
+	'''rev_params : rev_params COMMA rev_params
                   | type dim NAME
 				  | typename
 				  | '''
 	global symbols, loadedFuncs
 	if len(t) == 1: t[0] = ""
 	elif len(t) == 4: 
-		symbols[t[3]] = "%s[]"%t[1]
-		t[0] = "%s %s %s"%(t[1],t[2],t[3])
-	elif len(t) == 2: t[0] = t[1]
-	else: t[0] = "%s, %s"%(t[1],t[2])
+		if t[2] == ",":
+			t[0] = "%s, %s"%(t[1],t[3])
+		else:
+			symbols[t[3]] = "%s[]"%t[1]
+			t[0] = "%s %s %s"%(t[1],t[2],t[3])
+	else: t[0] = t[1]
     
 
 def p_params_snd(t):
@@ -523,8 +525,11 @@ def p_type_graph(t):
 
 def p_statement_print(t):
 	'statement : PRINT value'
+	global header
 	type = get_type(t[2])
-	if type == "double[]" or type == "String[]": t[0] = "System.out.println(  Arrays.toString(%s) );"%t[2]
+	if type == "double[]" or type == "String[]": 
+		header += "import java.util.Arrays;;\n"
+		t[0] = "System.out.println(  Arrays.toString(%s) );"%t[2]
 	else: t[0] = "System.out.println(%s);"%t[2]
     
 
@@ -568,7 +573,7 @@ def p_statement_for4(t):
 	t[0] = "%s for(; (%s) != 0;) { %s}"%(t[3],t[5],t[9])
 
 def p_error(t):
-	print("Syntax error at '%s'" % [t.value])
+	raise BaseException("Line %s: Syntax error at '%s"%(t.lexer.lineno-1,[t.value]))
 
     
 def p_break(t):
@@ -597,7 +602,7 @@ def p_multidim(t):
 
 def p_dim(t):
 	'''dim : LSBRACKET value RSBRACKET'''
-	t[0] = "[(int)%s]"%t[2]
+	t[0] = "[(int)(%s)]"%t[2]
 
 def p_dim_empty(t):
 	'''dim : LSBRACKET RSBRACKET'''
@@ -643,7 +648,7 @@ def p_entry2(t):
 
 def p_shell_args(t):
         'value : DOLLAR value'
-        t[0] = "args[(int)%s]"%t[2]
+        t[0] = "args[(int)(%s)]"%t[2]
 
 ######################### FILE_IO
 
@@ -677,6 +682,8 @@ def get_type(x):
 		return 'double'
 	elif is_text_literal(x):
 		return 'String'
+	elif is_non_indexed_array(x):
+		return get_non_indexed_array_type(x)
 	elif is_indexed_array(x):
 		return get_indexed_array_type(x)
 	else:
@@ -688,19 +695,28 @@ def is_num_literal(x):
 def is_text_literal(x):
 	return str(x).startswith('"') and x.endswith('"')
 
+def is_non_indexed_array(x):
+	m = re.match('[a-zA-Z0-9_]+ \[\]',x)
+	m = (m != None) 
+	return m
+
+def get_non_indexed_array_type(x):
+	array = x.split('[')[0][:-1]
+	return "%s[]"%get_type(array)
+    
 def is_indexed_array(x):
-	m = re.match('^[a-zA-Z0-9_]+\[\d+\]$',x)
+	m = re.match('[a-zA-Z0-9_]+ \[[^[].*$',x)
 	m = (m != None)
 	return m
 
 def get_indexed_array_type(x):
-	array = x.split('[')[0]
-	return "%s[]"%get_type(array)
+	array = x.split('[')[0][:-1]
+	return "%s"%(get_type(array).split('[')[0])
 
 
 # perform translation
 
-yacc.yacc()
+yacc.yacc(debug=False)
 
 input_code = open(sys.argv[1],"r")
 
