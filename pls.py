@@ -478,12 +478,12 @@ def p_params_rev(t):
     
 
 def p_params_snd(t):
-	'''snd_params : snd_params snd_params
+	'''snd_params : snd_params COMMA snd_params
 				  | value
 				  | '''
 	if len(t) == 1: t[0] = ""
 	elif len(t) == 2: t[0] = t[1]
-	else: t[0] = "%s, %s"%(t[1],t[2])
+	else: t[0] = "%s, %s"%(t[1],t[3])
 
 def p_return(t):
 	'statement : RETURN value'
@@ -734,7 +734,7 @@ yacc.parse(output_code)
 
 
 
-print "package com.pipelinescript;"
+#print "package com.pipelinescript;"
 print header
 print "public class Pipeline\n{"
 print functions
