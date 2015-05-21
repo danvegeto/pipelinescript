@@ -1,5 +1,5 @@
 function scrape 	= !"newspaper/scrape.py"
-function head 		= !"head"
+function head 		= !"head -n 5"
 function download 	= !"newspaper/download.py"
 function get_names 	= !"stanford-ner/ner.py"
 function count 		= !"count.py"

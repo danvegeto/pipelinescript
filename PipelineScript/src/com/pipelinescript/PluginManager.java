@@ -44,7 +44,7 @@ public class PluginManager
 		{
 			
 			String cmd = exec+arguments;
-			System.out.println(cmd);
+			System.err.println(cmd);
 			
 			Process pr = Runtime.getRuntime().exec(cmd);
 			BufferedReader bfr = new BufferedReader(new InputStreamReader(pr.getInputStream()));
